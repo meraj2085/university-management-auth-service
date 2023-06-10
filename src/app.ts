@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import routes from './app/routes';
+import handleNotFoundError from './errors/handleNotFoundError';
 
 const app: Application = express();
 app.use(cors());
@@ -20,5 +21,8 @@ app.get('/', async (req: Request, res: Response) => {
 
 // Global Error Handler
 app.use(globalErrorHandler);
+
+// Handle not found routes
+app.use(handleNotFoundError());
 
 export default app;
