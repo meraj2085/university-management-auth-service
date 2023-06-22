@@ -102,32 +102,23 @@ const updateFaculty = async (
 };
 
 const deleteFaculty = async (id: string): Promise<IFaculty | null> => {
-  // check if the faculty is exist
-  const isExist = await Faculty.findOne({ id });
-
-  if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Faculty not found !');
-  }
-
   const session = await mongoose.startSession();
-
+  let deleteFromFaculty: IFaculty | null;
   try {
     session.startTransaction();
-    //delete faculty first
-    const faculty = await Faculty.findOneAndDelete({ id }, { session });
-    if (!faculty) {
-      throw new ApiError(404, 'Failed to delete student');
+    const deleteFromUser = await User.findOneAndDelete({ id });
+    if (!deleteFromUser) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
     }
-    //delete user
-    await User.deleteOne({ id });
-    session.commitTransaction();
-    session.endSession();
-
-    return faculty;
+    deleteFromFaculty = await Faculty.findOneAndDelete({ id });
+    await session.commitTransaction();
+    await session.endSession();
   } catch (error) {
-    session.abortTransaction();
+    await session.abortTransaction();
+    await session.endSession();
     throw error;
   }
+  return deleteFromFaculty;
 };
 
 export const FacultyService = {
