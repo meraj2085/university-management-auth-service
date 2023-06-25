@@ -8,21 +8,20 @@ import { jwtHelpers } from '../../../helpers/jwtHelpers';
 
 const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   const { id, password } = payload;
-  const user = new User();
-  const isUserExist = await user.isUserExist(id);
+  const isUserExist = await User.isUserExist(id);
   if (!isUserExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User doesn't exist");
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
   }
 
-  // Match password
+  // Check if password is correct
   if (
     isUserExist.password &&
-    !user.isPasswordMatched(password, isUserExist?.password)
+    !(await User.isPasswordMatched(password, isUserExist.password))
   ) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
   }
-  
-  // Create JWT token
+
+  //create access token & refresh token
   const { id: userId, role, needsPasswordChange } = isUserExist;
   const accessToken = jwtHelpers.createToken(
     { userId, role },

@@ -32,17 +32,20 @@ const UserSchema = new Schema<IUser, Record<string, never>, IUserMethods>(
 );
 
 // Check if user exists
-UserSchema.methods.isUserExist = async function (
+UserSchema.statics.isUserExist = async function (
   id: string
-): Promise<Partial<IUser> | null> {
+): Promise<Pick<
+  IUser,
+  'id' | 'password' | 'role' | 'needsPasswordChange'
+> | null> {
   return await User.findOne(
     { id },
     { id: 1, password: 1, role: 1, needsPasswordChange: 1 }
-  ).lean();
+  );
 };
 
 // Password Matching
-UserSchema.methods.isPasswordMatched = async function (
+UserSchema.statics.isPasswordMatched = async function (
   givenPassword: string,
   savedPassword: string
 ): Promise<boolean> {
