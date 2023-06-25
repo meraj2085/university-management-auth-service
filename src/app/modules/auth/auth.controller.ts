@@ -4,16 +4,25 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
 import { ILoginUserResponse } from './auth.interface';
+import config from '../../../config';
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { ...loginData } = req.body;
   const result = await AuthService.loginUser(loginData);
+  const { refreshToken, ...others } = result;
 
+  // Set refresh token into cookie
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.env === 'production',
+    httpOnly: true,
+  });
+
+  
   sendResponse<ILoginUserResponse>(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'User login successfully!',
-    data: result,
+    data: others,
   });
 });
 
