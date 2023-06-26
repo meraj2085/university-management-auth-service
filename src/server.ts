@@ -37,9 +37,13 @@ async function bootstrap() {
 
 bootstrap();
 
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM is received');
-  if (server) {
-    server.close();
+process.on('SIGTERM', async () => {
+  try {
+    await server.close();
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+    process.exit(1);
   }
 });
+
